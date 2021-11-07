@@ -69,7 +69,7 @@ use crate::types::{GetPeerId, GetPeerIdResult};
 use crate::types::{RoutingSyncV2, RoutingVersion2};
 
 /// How often to request peers from active peers.
-const REQUEST_PEERS_INTERVAL: Duration = Duration::from_secs(60);
+const REQUEST_PEERS_INTERVAL: Duration = Duration::from_millis(60_000);
 /// How much time to wait (in milliseconds) after we send update nonce request before disconnecting.
 /// This number should be large to handle pair of nodes with high latency.
 const WAIT_ON_TRY_UPDATE_NONCE: Duration = Duration::from_millis(6_000);
