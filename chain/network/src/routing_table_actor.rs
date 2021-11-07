@@ -163,9 +163,7 @@ impl RoutingTableActor {
         edges
     }
 
-    /// If peer_id is not on memory check if it is on disk in bring it back on memory.
-    /// IF peer `other_peer_id` is not in the memory, we will fetch all edges from disk that
-    /// contain that peer.
+    /// If peer_id is not in memory check if it is on disk in bring it back on memory.
     fn fetch_edges_for_peer_from_disk(&mut self, other_peer_id: &PeerId) {
         if other_peer_id == self.my_peer_id()
             || self.peer_last_time_reachable.contains_key(other_peer_id)
