@@ -214,7 +214,8 @@ impl RoutingTableActor {
         &self.raw_graph.source
     }
 
-    /// Recalculate routing table.
+    /// Recalculate routing table and update list of reachable peers.
+    /// If pruning is enabled we will remove unused edges and store them to disk.
     ///
     /// # Returns
     /// List of edges removed.
