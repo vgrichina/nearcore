@@ -508,17 +508,6 @@ impl Handler<RoutingTableMessages> for RoutingTableActor {
                 }
                 RoutingTableMessagesResponse::Empty
             }
-            #[cfg(feature = "protocol_feature_routing_exchange_algorithm")]
-            RoutingTableMessages::StartRoutingTableSync { seed } => {
-                RoutingTableMessagesResponse::StartRoutingTableSyncResponse(
-                    PeerMessage::RoutingTableSyncV2(RoutingSyncV2::Version2(RoutingVersion2 {
-                        known_edges: self.edges_info.len() as u64,
-                        seed,
-                        edges: Default::default(),
-                        routing_state: RoutingState::InitializeIbf,
-                    })),
-                )
-            }
             RoutingTableMessages::RequestRoutingTable => {
                 RoutingTableMessagesResponse::RequestRoutingTableResponse {
                     edges_info: self.edges_info.iter().map(|(_k, v)| v.clone()).collect(),
