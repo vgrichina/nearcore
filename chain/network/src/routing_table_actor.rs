@@ -44,7 +44,7 @@ pub enum Prune {
 /// RoutingTableActor that maintains routing table information. We currently have only one
 /// instance of this actor.
 ///
-/// We store the following information
+/// We store the following information:
 ///   - list of all known edges
 ///   - helper data structure for exchanging routing table
 ///   - routing information (where a message should be send to reach given peer)
