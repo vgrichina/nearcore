@@ -59,7 +59,7 @@ use crate::StatusResponse;
 use actix::dev::SendError;
 use near_chain::chain::{
     do_apply_chunks, ApplyStatePartsRequest, ApplyStatePartsResponse, BlockCatchUpRequest,
-    BlockCatchUpResponse, OrphanMissingChunksInfo, StateSplitRequest, StateSplitResponse,
+    BlockCatchUpResponse, StateSplitRequest, StateSplitResponse,
 };
 use near_client_primitives::types::{
     Error, GetNetworkInfo, NetworkInfoResponse, ShardSyncDownload, ShardSyncStatus, Status,
