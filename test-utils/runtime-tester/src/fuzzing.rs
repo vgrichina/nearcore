@@ -22,8 +22,8 @@ pub type ContractId = usize;
 pub const MAX_BLOCKS: usize = 250;
 pub const MAX_TXS: usize = 50;
 pub const MAX_TX_DIFF: usize = 10;
-pub const MAX_ACCOUNTS: usize = 100;
-pub const MAX_ACTIONS: usize = 100;
+pub const MAX_ACCOUNTS: usize = 10;
+pub const MAX_ACTIONS: usize = 10;
 
 const GAS_1: u64 = 300_000_000_000_000;
 
