@@ -19,7 +19,9 @@ use std::collections::HashSet;
 use std::env;
 use std::fs;
 use std::fs::File;
+use std::io::Write;
 use std::path::Path;
+use std::path::PathBuf;
 
 /// Returns a `NearConfig` with genesis records taken from the current state.
 /// If `records_path` argument is provided, then records will be streamed into a separate file,
@@ -229,7 +231,7 @@ pub fn state_dump_exploded(
     runtime: NightshadeRuntime,
     state_roots: &[StateRoot],
     last_block_header: BlockHeader,
-) -> redis::RedisResult<()> {
+) -> Result<(), std::io::Error> {
 
     let block_height = last_block_header.height();
     let block_hash = last_block_header.hash();
@@ -246,7 +248,8 @@ pub fn state_dump_exploded(
         let mut last_file: Option<File> = None;
         for item in trie.iter().unwrap() {
             let (key, value) = item.unwrap();
-            if let Some(sr) = StateRecord::from_raw_key_value(key, value) {
+
+            if let Some(sr) = StateRecord::from_raw_key_value(key.clone(), value.clone()) {
                 let account_id = state_record_to_account_id(&sr);
                 if !include_patterns.is_empty() && !include_patterns.iter().any(|pattern| pattern.matches(account_id)) {
                     continue;
@@ -255,10 +258,24 @@ pub fn state_dump_exploded(
                     continue;
                 }
 
-                println!("account_id: {}", account_id);
+                if last_account_id.is_none() || account_id != &last_account_id.unwrap() {
+                    let mut path: PathBuf = PathBuf::from(output_path);
+                    path.push(account_id.as_ref().get(0..1).unwrap());
+                    fs::create_dir_all(path.as_path())?;
+                    path.push(account_id.as_ref());
+                    last_file = Some(File::options().create(true).append(true).open(path.as_path())?);
+                }
 
-                // TODO: Get file instance for given account
-                // TODO: Write (key, value) to file
+                if last_file.is_some() {
+                    let file = last_file.as_mut().unwrap();
+                    file.write_all(&key.len().to_le_bytes())?;
+                    file.write_all(&key)?;
+                    file.write_all(&value.len().to_le_bytes())?;
+                    file.write_all(&value)?;
+                }
+
+                println!("account_id: {}", account_id);
+                last_account_id = Some(account_id.clone());
             }
         }
     }
