@@ -23,6 +23,9 @@ pub enum StateViewerSubCommand {
     DumpState(DumpStateCmd),
     #[clap(alias = "dump_state_redis")]
     DumpStateRedis(DumpStateRedisCmd),
+    /// Dumps state into directory separated into accounts 
+    #[clap(alias = "dump_state_exploded")]
+    DumpStateExploded(DumpStateExplodedCmd),
     /// Generate a file that contains all transactions from a block.
     #[clap(alias = "dump_tx")]
     DumpTx(DumpTxCmd),
@@ -89,6 +92,7 @@ impl StateViewerSubCommand {
             StateViewerSubCommand::DumpState(cmd) => cmd.run(home_dir, near_config, hot),
             StateViewerSubCommand::DumpStateParts(cmd) => cmd.run(home_dir, near_config, hot),
             StateViewerSubCommand::DumpStateRedis(cmd) => cmd.run(home_dir, near_config, hot),
+            StateViewerSubCommand::DumpStateExploded(cmd) => cmd.run(home_dir, near_config, hot),
             StateViewerSubCommand::DumpTx(cmd) => cmd.run(home_dir, near_config, hot),
             StateViewerSubCommand::Chain(cmd) => cmd.run(home_dir, near_config, hot),
             StateViewerSubCommand::Replay(cmd) => cmd.run(home_dir, near_config, hot),
@@ -173,6 +177,31 @@ pub struct DumpStateRedisCmd {
 impl DumpStateRedisCmd {
     pub fn run(self, home_dir: &Path, near_config: NearConfig, store: Store) {
         dump_state_redis(self.height, self.include, self.exclude, home_dir, near_config, store);
+    }
+}
+
+#[derive(Parser)]
+pub struct DumpStateExplodedCmd {
+    /// Dump output directory path.
+    #[clap(long, parse(from_os_str))]
+    output_path: PathBuf,
+
+    /// Optionally, can specify at which height to dump state.
+    #[clap(long)]
+    height: Option<BlockHeight>,
+
+    /// Optionally, can specify which accounts to include (supports glob patterns)
+    #[clap(long)]
+    include: Vec<String>,
+
+    /// Optionally, can specify which accounts to exclude (supports glob patterns)
+    #[clap(long)]
+    exclude: Vec<String>,
+}
+
+impl DumpStateExplodedCmd {
+    pub fn run(self, home_dir: &Path, near_config: NearConfig, store: Store) {
+        dump_state_exploded(self.output_path.as_path(), self.height, self.include, self.exclude, home_dir, near_config, store);
     }
 }
 

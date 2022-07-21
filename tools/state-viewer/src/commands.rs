@@ -1,6 +1,7 @@
 use crate::apply_chain_range::apply_chain_range;
 use crate::state_dump::state_dump;
 use crate::state_dump::state_dump_redis;
+use crate::state_dump::state_dump_exploded;
 use crate::tx_dump::dump_tx_from_block;
 use crate::{apply_chunk, epoch_info};
 use ansi_term::Color::Red;
@@ -116,6 +117,26 @@ pub(crate) fn dump_state_redis(
         load_trie_stop_at_height(store, home_dir, &near_config, mode);
 
     let res = state_dump_redis(include, exclude, runtime, &state_roots, header);
+    assert_eq!(res, Ok(()));
+}
+
+pub(crate) fn dump_state_exploded(
+    output_path: &Path,
+    height: Option<BlockHeight>,
+    include: Vec<String>,
+    exclude: Vec<String>,
+    home_dir: &Path,
+    near_config: NearConfig,
+    store: Store,
+) {
+    let mode = match height {
+        Some(h) => LoadTrieMode::LastFinalFromHeight(h),
+        None => LoadTrieMode::Latest,
+    };
+    let (runtime, state_roots, header) =
+        load_trie_stop_at_height(store, home_dir, &near_config, mode);
+
+    let res = state_dump_exploded(output_path, include, exclude, runtime, &state_roots, header);
     assert_eq!(res, Ok(()));
 }
 

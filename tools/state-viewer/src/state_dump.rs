@@ -222,6 +222,50 @@ pub fn state_dump_redis(
     Ok(())
 }
 
+pub fn state_dump_exploded(
+    output_path: &Path,
+    include: Vec<String>,
+    exclude: Vec<String>,
+    runtime: NightshadeRuntime,
+    state_roots: &[StateRoot],
+    last_block_header: BlockHeader,
+) -> redis::RedisResult<()> {
+
+    let block_height = last_block_header.height();
+    let block_hash = last_block_header.hash();
+
+    let include_patterns: Vec<Pattern> = include.iter().map(|str| { Pattern::new(&str).expect(&format!("error parsing include: '{}'", str)) }).collect();
+    let exclude_patterns: Vec<Pattern> = exclude.iter().map(|str| { Pattern::new(&str).expect(&format!("error parsing exclude: '{}'", str)) }).collect();
+
+    for (shard_id, state_root) in state_roots.iter().enumerate() {
+        let trie = runtime
+            .get_trie_for_shard(shard_id as u64, last_block_header.prev_hash(), state_root.clone())
+            .unwrap();
+
+        let mut last_account_id: Option<AccountId> = None;
+        let mut last_file: Option<File> = None;
+        for item in trie.iter().unwrap() {
+            let (key, value) = item.unwrap();
+            if let Some(sr) = StateRecord::from_raw_key_value(key, value) {
+                let account_id = state_record_to_account_id(&sr);
+                if !include_patterns.is_empty() && !include_patterns.iter().any(|pattern| pattern.matches(account_id)) {
+                    continue;
+                }
+                if !exclude_patterns.is_empty() && exclude_patterns.iter().any(|pattern| pattern.matches(account_id)) {
+                    continue;
+                }
+
+                println!("account_id: {}", account_id);
+
+                // TODO: Get file instance for given account
+                // TODO: Write (key, value) to file
+            }
+        }
+    }
+
+    Ok(())
+}
+
 fn should_include_record(
     record: &StateRecord,
     account_allowlist: &Option<HashSet<&AccountId>>,
