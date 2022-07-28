@@ -139,7 +139,7 @@ pub(crate) fn dump_state_exploded(
 
     let res: Result<(), std::io::Error> = state_dump_exploded(output_path, include, exclude, runtime, &state_roots, header);
     // NOTE: If following is uncommented it gives error: expected enum `rkyv::result::ArchivedResult`, found enum `Result`
-    // assert_eq!(res, Ok(()));
+    assert!(res.is_ok());
 }
 
 pub(crate) fn dump_tx(
